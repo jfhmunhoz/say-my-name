@@ -1,0 +1,12 @@
+# Neovim / Lua
+*.luac
+
+# OS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+
+# Papers / research must never land here
+*.pdf
