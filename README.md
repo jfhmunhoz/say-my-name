@@ -1,4 +1,4 @@
-# nvim-a11y (working title)
+# say-my-name
 
 Modular Neovim plugins that improve the developer experience for blind and
 low-vision programmers.
