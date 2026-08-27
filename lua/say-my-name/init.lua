@@ -2,6 +2,7 @@
 -- Content providers are pure-ish: read editor state, hand text to the speech manager.
 
 local speech = require("say-my-name.speech")
+local earcon = require("say-my-name.earcon")
 
 local M = {}
 
@@ -55,6 +56,12 @@ end
 -- Speak the current line number.
 function M.line_number()
   speech.say("line " .. vim.fn.line("."))
+end
+
+-- Beep the indentation of the current line: one beep per leading space
+-- (tabs expanded to 'tabstop'). Beats reading "space space space".
+function M.indent()
+  earcon.beep(vim.fn.indent(vim.fn.line(".")))
 end
 
 -- Panic-silence.
