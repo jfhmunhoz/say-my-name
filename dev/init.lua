@@ -42,6 +42,7 @@ smn.setup({ verbosity = "minimal" }) -- start quiet; commands only
 
 -- manual commands (always work)
 vim.keymap.set("n", "<leader>l", smn.line, { desc = "Speak current line" })
+vim.keymap.set("n", "<leader>$", smn.line_to_end, { desc = "Speak cursor to end of line" })
 vim.keymap.set("n", "<leader>w", smn.word, { desc = "Speak word under cursor" })
 vim.keymap.set("n", "<leader>n", smn.line_number, { desc = "Speak line number" })
 vim.keymap.set("n", "<leader>i", smn.indent, { desc = "Beep indentation depth" })

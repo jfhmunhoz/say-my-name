@@ -97,6 +97,12 @@ end
 -- ===========================================================================
 
 function M.line() speech.say_segments(seg_line()) end
+
+-- Speak from the cursor to the end of the line (like vim's $).
+function M.line_to_end()
+  speech.say(vim.api.nvim_get_current_line():sub(vim.fn.col(".")))
+end
+
 function M.word() speech.say_segments(seg_word()) end
 function M.line_number() speech.say_segments(seg_line_number()) end
 

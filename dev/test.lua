@@ -2,6 +2,7 @@
 --
 -- Keymaps (leader = space):
 --   <leader>l  speak current line        (comments read in a distinct voice)
+--   <leader>$  speak from cursor to end of line
 --   <leader>w  speak word under cursor
 --   <leader>n  speak line number
 --   <leader>i  beep indentation depth    (one beep per leading space)
