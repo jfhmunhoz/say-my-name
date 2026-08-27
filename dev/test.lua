@@ -8,6 +8,16 @@
 --   <leader>d  speak diagnostics on line (lua_ls; graver pitch = worse)
 --   <leader>s  stop / panic-silence
 --
+-- Auto-announce (speaks as you move to a new line):
+--   <leader>v  cycle verbosity preset  (minimal -> normal -> verbose)
+--   <leader>tn toggle auto line number
+--   <leader>tl toggle auto line
+--   <leader>td toggle auto diagnostics
+--   <leader>ti toggle auto indent
+--   <leader>tw toggle auto word   (speaks each word as you jump w/b/e)
+-- Pick a preset with <leader>v, then tweak with <leader>t*. minimal = commands
+-- only; verbose = number + line + diagnostics + indent beep on every new line.
+--
 -- What to try, and what you should hear:
 
 local M = {}

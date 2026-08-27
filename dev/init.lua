@@ -38,10 +38,22 @@ vim.cmd("syntax on")
 vim.cmd("filetype plugin indent on")
 
 local smn = require("say-my-name")
+smn.setup({ verbosity = "minimal" }) -- start quiet; commands only
 
+-- manual commands (always work)
 vim.keymap.set("n", "<leader>l", smn.line, { desc = "Speak current line" })
 vim.keymap.set("n", "<leader>w", smn.word, { desc = "Speak word under cursor" })
 vim.keymap.set("n", "<leader>n", smn.line_number, { desc = "Speak line number" })
 vim.keymap.set("n", "<leader>i", smn.indent, { desc = "Beep indentation depth" })
 vim.keymap.set("n", "<leader>d", smn.diagnostics, { desc = "Speak line diagnostics" })
 vim.keymap.set("n", "<leader>s", smn.stop, { desc = "Stop speech (panic-silence)" })
+
+-- verbosity preset: cycle minimal -> normal -> verbose
+vim.keymap.set("n", "<leader>v", smn.cycle_verbosity, { desc = "Cycle verbosity preset" })
+
+-- per-feature auto toggles (<leader>t<feature>)
+vim.keymap.set("n", "<leader>tn", function() smn.toggle("line_number") end, { desc = "Toggle auto line number" })
+vim.keymap.set("n", "<leader>tl", function() smn.toggle("line") end, { desc = "Toggle auto line" })
+vim.keymap.set("n", "<leader>td", function() smn.toggle("diagnostics") end, { desc = "Toggle auto diagnostics" })
+vim.keymap.set("n", "<leader>ti", function() smn.toggle("indent") end, { desc = "Toggle auto indent" })
+vim.keymap.set("n", "<leader>tw", function() smn.toggle("word") end, { desc = "Toggle auto word" })

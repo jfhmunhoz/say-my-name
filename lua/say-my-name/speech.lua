@@ -4,6 +4,10 @@
 
 local M = {}
 
+-- Generation token: any new utterance bumps it, so an in-flight segment chain
+-- from a previous call stops spawning (matters for fast cursor navigation).
+local gen = 0
+
 -- Build a spd-say argv for one utterance.
 --   opts.voice  spd-say voice type (e.g. "female1") — carries meaning via timbre
 --   opts.pitch  -100..100
@@ -23,7 +27,11 @@ end
 -- Speak text. Cancels any in-flight utterance first (always interruptible),
 -- spawns asynchronously (never blocks the editor).
 function M.say(text, opts)
-  if not text or text == "" then return end
+  gen = gen + 1
+  if not text or text == "" then
+    vim.system({ "spd-say", "-C" })
+    return
+  end
   vim.system({ "spd-say", "-C" }) -- interrupt current utterance, no backlog
   vim.system(build_cmd(text, opts))
 end
@@ -33,9 +41,12 @@ end
 -- Each segment waits (-w) and the next is spawned from its on_exit, so order
 -- is guaranteed. nvim stays non-blocking (the waiting happens in the child).
 function M.say_segments(list)
+  gen = gen + 1
+  local mygen = gen
   vim.system({ "spd-say", "-C" }) -- cancel once, up front
   local i = 0
   local function next_seg()
+    if mygen ~= gen then return end -- superseded by a newer utterance
     i = i + 1
     local s = list[i]
     if not s then return end
@@ -49,6 +60,7 @@ end
 
 -- Silence immediately (panic key).
 function M.stop()
+  gen = gen + 1
   vim.system({ "spd-say", "-C" })
 end
 
