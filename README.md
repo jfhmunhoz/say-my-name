@@ -1,22 +1,115 @@
 # say-my-name
 
-Modular Neovim plugins that improve the developer experience for blind and
-low-vision programmers.
+A Neovim plugin that improves the developer experience for **blind and
+low-vision programmers** — a speech layer that announces code structure,
+context, and diagnostics on demand, built to be concise and controllable rather
+than chatty.
 
 This is the implementation repository for an undergraduate thesis (TCC) in
-Computer Science: *"Melhorando a experiência do desenvolvedor para
-programadores cegos e com baixa visão por meio de plugins acessíveis para o
-Neovim"*. The research, thesis writing, and paper corpus live in a separate
-private repository; this repo holds only the open-source code.
+Computer Science: *"Melhorando a experiência do desenvolvedor para programadores
+cegos e com baixa visão por meio de plugins acessíveis para o Neovim"*. The
+research, thesis writing, and paper corpus live in a separate private
+repository; this repo holds only the open-source code.
+
+## Why
+
+Screen readers present code **linearly** — one line, one character at a time —
+and lose its structure. That single root cause drives most of the friction blind
+developers report: they can't skim, indentation is read as "space space space",
+scope is invisible, and errors are announced without location or type. A
+keyboard-driven editor in the terminal, with a **programmable speech layer**, can
+attack that root cause directly.
+
+The design is driven by a review of 33 sources (academic + community). The most
+underrated finding: **less speech, on demand, beats more speech pushed at you.**
+Developers report turning the screen reader *off* because the noise breaks their
+flow. So the guiding principle here is a speech layer that is **concise,
+interruptible, dismissible, and prosodic** — that is the contribution, and what
+separates this from simply reading everything aloud.
+
+## Design principles (non-negotiable)
+
+- **One speech channel.** Nothing calls the synthesizer directly; everything goes
+  through a single manager that owns all audio I/O.
+- **Never block the editor.** Speech is spawned asynchronously.
+- **Always interruptible.** A new utterance cancels the current one — no backlog.
+- **Nothing forced or continuous.** Every announcement is on demand or opt-in per
+  event. Defaults are minimal. A panic key silences instantly.
+- **Coexist with a system screen reader** (Orca, etc.) — complement, don't
+  double-speak.
+- **Prosody carries information.** Pitch for indentation depth, tone for
+  error-vs-warning — cheaper than words.
+
+## Architecture
+
+```
+autocmds / keymaps  ──▶  content providers  ──▶  speech manager  ──▶  spd-say
+   (triggers)            (line/symbol/diag)      (queue+verbosity)   (async, cancelable)
+```
+
+Content providers are **pure** — they return text (and optional prosody) for a
+given context. The **speech manager** owns queueing, verbosity, interruption, and
+the backend. This keeps providers testable and the backend swappable.
+
+### Speech backend
+
+- Default: **`spd-say`** (speech-dispatcher) — asynchronous, cancelable
+  (`spd-say -C`), and on the same bus Orca already uses.
+- Fallback: **`espeak-ng`** (direct, lowest latency).
+- Later: **piper** (neural, natural voice) in server mode for quality.
+
+Spawned via `vim.system()` (Neovim ≥ 0.10), never blocking.
+
+## Roadmap
+
+Build order is dependency order. Each core feature addresses a specific,
+evidence-backed friction point.
+
+### 0 — Speech manager (foundation, build first)
+Single choke point: async spawn, interruptible queue, verbosity levels
+(`off | minimal | normal | verbose`), panic-silence key, Orca coexistence.
+
+### MVP core
+
+| # | Feature | Friction addressed | Neovim mechanism |
+|---|---------|--------------------|------------------|
+| 1 | **Mode / action feedback** — "insert", "normal", "saved", "N lines yanked" | no non-visual cue for mode/action (cheapest win) | `ModeChanged`, `BufWritePost`, `TextYankPost` |
+| 2 | **Cursor context on demand** — current line + line number + indent level | linear reading; lost position | keymap → `getline`/`line('.')`; debounced opt-in `CursorMoved` |
+| 3 | **Indent / scope depth** — "level 3", or pitch earcon by depth | indentation read as "space space space"; scope invisible | indent calc + treesitter node depth; pitch via espeak/piper |
+| 4 | **Structural navigation** — jump next/prev function/class, speak the symbol path | linear navigation, no overview (the big one) | LSP `textDocument/documentSymbol` + treesitter |
+| 5 | **Diagnostics by voice** — "line N, error, <message>" | errors announced without location or type | `vim.diagnostic.get()` + `DiagnosticChanged` / `CursorHold` |
+| 6 | **Statement marks** — bookmarks that track the statement, not the line number | lose your place when consulting other code | **extmarks** (`nvim_buf_set_extmark`) — shift with edits, unlike `:mark` |
+
+### Deferred (v2+)
+Debugger/DAP announcements, autocomplete announce, Git integration, AI-assistant
+guardrails, polished sonification. Lower evidence or higher effort — out of the
+initial scope.
+
+## Configuration (planned)
+
+A single entry point:
+
+```lua
+require("say-my-name").setup({
+  backend   = "spd-say",     -- "spd-say" | "espeak-ng" | "piper"
+  rate      = 350,           -- words per minute
+  verbosity = "minimal",     -- off | minimal | normal | verbose
+  speak     = {              -- which events announce
+    mode = true, save = true, diagnostics = true,
+  },
+  -- keymaps for on-demand context, navigation, marks, panic-silence
+})
+```
 
 ## Status
 
-Early development.
+Early development — design phase. See the roadmap above.
 
 ## Reference environment
 
 - Ubuntu 24.04.2 LTS
 - Neovim 0.12-dev
+- speech-dispatcher / espeak-ng
 
 ## License
 
