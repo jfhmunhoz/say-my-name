@@ -10,10 +10,38 @@ vim.opt.runtimepath:prepend(root)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- Minimal LSP for testing diagnostics: lua_ls. Starts on any Lua buffer if the
+-- binary is present; no-op otherwise. Install: LuaLS releases -> ~/.local/bin.
+-- Registered BEFORE `filetype on` below: enabling filetype detection fires
+-- FileType for the startup-arg buffer synchronously, so this must exist first.
+if vim.fn.executable("lua-language-server") == 1 then
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "lua",
+    callback = function(args)
+      -- schedule: starting mid-startup (file passed as arg) doesn't attach.
+      vim.schedule(function()
+        vim.lsp.start({
+          name = "lua_ls",
+          cmd = { "lua-language-server" },
+          root_dir = vim.fs.root(args.buf, { ".luarc.json", ".git" }) or vim.fn.getcwd(),
+          settings = { Lua = { diagnostics = { globals = { "vim" } } } },
+        })
+      end)
+    end,
+  })
+end
+
+-- -u skips defaults.vim, so turn these on explicitly. syntax on is what the
+-- comment-voice fallback (syntax highlight group) relies on when no treesitter
+-- parser exists for the buffer's language.
+vim.cmd("syntax on")
+vim.cmd("filetype plugin indent on")
+
 local smn = require("say-my-name")
 
 vim.keymap.set("n", "<leader>l", smn.line, { desc = "Speak current line" })
 vim.keymap.set("n", "<leader>w", smn.word, { desc = "Speak word under cursor" })
 vim.keymap.set("n", "<leader>n", smn.line_number, { desc = "Speak line number" })
 vim.keymap.set("n", "<leader>i", smn.indent, { desc = "Beep indentation depth" })
+vim.keymap.set("n", "<leader>d", smn.diagnostics, { desc = "Speak line diagnostics" })
 vim.keymap.set("n", "<leader>s", smn.stop, { desc = "Stop speech (panic-silence)" })

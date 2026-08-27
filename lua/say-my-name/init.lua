@@ -64,6 +64,32 @@ function M.indent()
   earcon.beep(vim.fn.indent(vim.fn.line(".")))
 end
 
+-- Severity -> spoken name + pitch. Graver pitch for worse severity so the ear
+-- grades the problem before hearing the message (prosody carries info).
+local SEV = {
+  [vim.diagnostic.severity.ERROR] = { name = "error",   pitch = -30 },
+  [vim.diagnostic.severity.WARN]  = { name = "warning", pitch = -10 },
+  [vim.diagnostic.severity.INFO]  = { name = "info",    pitch = 10 },
+  [vim.diagnostic.severity.HINT]  = { name = "hint",    pitch = 20 },
+}
+
+-- Speak the LSP diagnostics on the current line, worst severity first.
+function M.diagnostics()
+  local ds = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
+  if #ds == 0 then
+    speech.say("no diagnostics")
+    return
+  end
+  table.sort(ds, function(a, b) return a.severity < b.severity end)
+  local segs = {}
+  for _, d in ipairs(ds) do
+    local s = SEV[d.severity] or { name = "note", pitch = 0 }
+    local msg = (d.message or ""):gsub("%s+", " ")
+    segs[#segs + 1] = { text = s.name .. ", " .. msg, opts = { pitch = s.pitch } }
+  end
+  speech.say_segments(segs)
+end
+
 -- Panic-silence.
 function M.stop()
   speech.stop()
