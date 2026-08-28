@@ -5,6 +5,9 @@
 --   <leader>$  speak from cursor to end of line
 --   <leader>w  speak word under cursor
 --   <leader>n  speak line number
+--   <leader>m  speak current mode      (also in visual/select)
+--   <leader>v  speak selection         (VISUAL mode; normal-mode <leader>v = verbosity)
+--   <leader>y  speak last yank
 --   <leader>i  beep indentation depth    (one beep per leading space)
 --   <leader>d  speak diagnostics on line (lua_ls; graver pitch = worse)
 --   <leader>s  stop / panic-silence
@@ -16,6 +19,8 @@
 --   <leader>td toggle auto diagnostics
 --   <leader>ti toggle auto indent
 --   <leader>tw toggle auto word   (speaks each word as you jump w/b/e)
+--   <leader>tm toggle auto mode   (speaks the mode whenever you switch)
+--   <leader>ty toggle auto yank   (speaks yanked text after each yank)
 -- Pick a preset with <leader>v, then tweak with <leader>t*. minimal = commands
 -- only; verbose = number + line + diagnostics + indent beep on every new line.
 --

@@ -60,25 +60,69 @@ the backend. This keeps providers testable and the backend swappable.
 
 Spawned via `vim.system()` (Neovim ≥ 0.10), never blocking.
 
+## Implemented
+
+Working today (preview; the API is still moving). The plugin exposes functions
+on `require("say-my-name")`; the example key bindings below live in
+[`dev/init.lua`](dev/init.lua) — a test harness, so the plugin never forces
+keymaps on you. Leader is space in the harness.
+
+**On-demand commands**
+
+| Key | Speaks |
+|-----|--------|
+| `<leader>l` | current line (comments in a distinct voice) |
+| `<leader>$` | cursor → end of line |
+| `<leader>w` | word under the cursor |
+| `<leader>n` | line number |
+| `<leader>i` | indentation depth — one low beep per leading space (earcon) |
+| `<leader>d` | line diagnostics, worst first, severity graded by pitch |
+| `<leader>m` | current mode (also in visual/select) |
+| `<leader>v` | the selection (visual mode) |
+| `<leader>y` | last yank |
+| `<leader>s` | stop / panic-silence |
+
+**Auto-announce** — fires as you move/act. Toggle one with `<leader>t<key>`
+(`tl` line, `tn` number, `td` diagnostics, `ti` indent, `tw` word, `tm` mode,
+`ty` yank), each spoken back as "… on/off".
+
+**Verbosity presets** — `<leader>v` (normal mode) cycles them; then tweak with
+the toggles above.
+
+| Preset | Auto-announces on a new line / event |
+|--------|--------------------------------------|
+| `minimal` | nothing — commands only |
+| `normal` | line + diagnostics |
+| `verbose` | line number + line + diagnostics + indent + mode |
+
+The speech manager foundation is in place: one channel over `spd-say`, async,
+cancel-first (interruptible), with a generation guard so fast navigation never
+stacks stale utterances.
+
 ## Roadmap
 
 Build order is dependency order. Each core feature addresses a specific,
-evidence-backed friction point.
+evidence-backed friction point. (✓ done · ◐ partial · ○ not started)
 
-### 0 — Speech manager (foundation, build first)
+### 0 — Speech manager (foundation, build first) — ◐
 Single choke point: async spawn, interruptible queue, verbosity levels
 (`off | minimal | normal | verbose`), panic-silence key, Orca coexistence.
+Done: channel, async, cancel-first, verbosity presets, panic key. Pending:
+per-utterance queueing beyond cancel, Orca coexistence tuning.
 
 ### MVP core
 
-| # | Feature | Friction addressed | Neovim mechanism |
-|---|---------|--------------------|------------------|
-| 1 | **Mode / action feedback** — "insert", "normal", "saved", "N lines yanked" | no non-visual cue for mode/action (cheapest win) | `ModeChanged`, `BufWritePost`, `TextYankPost` |
-| 2 | **Cursor context on demand** — current line + line number + indent level | linear reading; lost position | keymap → `getline`/`line('.')`; debounced opt-in `CursorMoved` |
-| 3 | **Indent / scope depth** — "level 3", or pitch earcon by depth | indentation read as "space space space"; scope invisible | indent calc + treesitter node depth; pitch via espeak/piper |
-| 4 | **Structural navigation** — jump next/prev function/class, speak the symbol path | linear navigation, no overview (the big one) | LSP `textDocument/documentSymbol` + treesitter |
-| 5 | **Diagnostics by voice** — "line N, error, <message>" | errors announced without location or type | `vim.diagnostic.get()` + `DiagnosticChanged` / `CursorHold` |
-| 6 | **Statement marks** — bookmarks that track the statement, not the line number | lose your place when consulting other code | **extmarks** (`nvim_buf_set_extmark`) — shift with edits, unlike `:mark` |
+| # | State | Feature | Friction addressed | Neovim mechanism |
+|---|-------|---------|--------------------|------------------|
+| 1 | ◐ | **Mode / action feedback** — "insert", "normal", "saved", "N lines yanked" | no non-visual cue for mode/action (cheapest win) | `ModeChanged`, `BufWritePost`, `TextYankPost` |
+| 2 | ✓ | **Cursor context on demand** — current line + line number + indent level | linear reading; lost position | keymap → `getline`/`line('.')`; debounced opt-in `CursorMoved` |
+| 3 | ✓ | **Indent / scope depth** — "level 3", or pitch earcon by depth | indentation read as "space space space"; scope invisible | indent calc + treesitter node depth; pitch via espeak/piper |
+| 4 | ○ | **Structural navigation** — jump next/prev function/class, speak the symbol path | linear navigation, no overview (the big one) | LSP `textDocument/documentSymbol` + treesitter |
+| 5 | ✓ | **Diagnostics by voice** — "line N, error, <message>" | errors announced without location or type | `vim.diagnostic.get()` + `DiagnosticChanged` / `CursorHold` |
+| 6 | ○ | **Statement marks** — bookmarks that track the statement, not the line number | lose your place when consulting other code | **extmarks** (`nvim_buf_set_extmark`) — shift with edits, unlike `:mark` |
+
+Mode/action feedback (#1) is partial: mode and yank announce; **save**
+(`BufWritePost`) is not wired yet.
 
 ### Deferred (v2+)
 Debugger/DAP announcements, autocomplete announce, Git integration, AI-assistant
@@ -103,7 +147,9 @@ require("say-my-name").setup({
 
 ## Status
 
-Early development — design phase. See the roadmap above.
+Early development. Core on-demand commands and the auto-announce/verbosity layer
+work (see [Implemented](#implemented)); structural navigation and statement
+marks are next. API and keymaps still subject to change.
 
 ## Reference environment
 

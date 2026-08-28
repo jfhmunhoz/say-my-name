@@ -92,6 +92,18 @@ local function indent_count()
   return vim.fn.indent(vim.fn.line("."))
 end
 
+-- Spoken name for the current vim mode.
+local MODE_NAMES = {
+  n = "normal", i = "insert", v = "visual", V = "visual line",
+  ["\22"] = "visual block", s = "select", S = "select line",
+  ["\19"] = "select block", R = "replace", c = "command",
+  t = "terminal", r = "prompt", ["!"] = "shell",
+}
+local function mode_name()
+  local m = vim.fn.mode()
+  return MODE_NAMES[m] or MODE_NAMES[m:sub(1, 1)] or m
+end
+
 -- ===========================================================================
 -- Manual commands (always work, independent of verbosity)
 -- ===========================================================================
@@ -112,15 +124,32 @@ function M.diagnostics()
 end
 
 function M.indent() earcon.beep(indent_count()) end
+function M.mode() speech.say(mode_name()) end
 function M.stop() speech.stop() end
+
+-- Speak the current visual selection (call from visual mode via <Cmd>).
+function M.selection()
+  local m = vim.fn.mode()
+  if m ~= "v" and m ~= "V" and m ~= "\22" then return end
+  local lines = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = m })
+  speech.say(table.concat(lines, " "))
+end
+
+-- Speak the last yank (register 0).
+function M.last_yank()
+  speech.say((vim.fn.getreg("0"):gsub("%s+", " ")))
+end
 
 -- ===========================================================================
 -- Verbosity + per-feature auto toggles
 -- ===========================================================================
 
--- Which features fire automatically as you move. `word` fires on any word
--- change; the rest fire when you enter a new line.
-local auto = { line_number = false, line = false, diagnostics = false, indent = false, word = false }
+-- Which features fire automatically. `word` fires on any word change; `mode`
+-- fires on mode switch; the rest fire when you enter a new line.
+local auto = {
+  line_number = false, line = false, diagnostics = false,
+  indent = false, word = false, mode = false, yank = false,
+}
 
 local labels = {
   line_number = "line number",
@@ -128,13 +157,15 @@ local labels = {
   diagnostics = "diagnostics",
   indent = "indent",
   word = "word",
+  mode = "mode",
+  yank = "yank",
 }
 
 -- Presets set a bundle of flags; tweak individually afterward.
 local presets = {
   minimal = {},
   normal  = { line = true, diagnostics = true },
-  verbose = { line_number = true, line = true, diagnostics = true, indent = true },
+  verbose = { line_number = true, line = true, diagnostics = true, indent = true, mode = true },
 }
 local preset_order = { "minimal", "normal", "verbose" }
 local current_preset = "minimal"
@@ -212,6 +243,21 @@ function M.setup(opts)
   -- forget position on buffer switch so the first move there announces
   vim.api.nvim_create_autocmd("BufEnter", { group = grp, callback = function()
     last_line, last_word = nil, nil
+  end })
+  -- mode announce on switch, deduped (skips transient same-name transitions)
+  local last_mode
+  vim.api.nvim_create_autocmd("ModeChanged", { group = grp, callback = function()
+    if not auto.mode then last_mode = nil; return end
+    local name = mode_name()
+    if name ~= last_mode then
+      last_mode = name
+      speech.say(name)
+    end
+  end })
+  -- announce yanked text (only yanks, not deletes/changes)
+  vim.api.nvim_create_autocmd("TextYankPost", { group = grp, callback = function()
+    if not auto.yank or vim.v.event.operator ~= "y" then return end
+    speech.say(table.concat(vim.v.event.regcontents or {}, " "))
   end })
 end
 
