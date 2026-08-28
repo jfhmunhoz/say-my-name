@@ -52,9 +52,9 @@ vim.keymap.set({ "n", "x", "s" }, "<leader>m", "<Cmd>lua require('say-my-name').
 vim.keymap.set("n", "<leader>y", smn.last_yank, { desc = "Speak last yank" })
 vim.keymap.set("n", "<leader>s", smn.stop, { desc = "Stop speech (panic-silence)" })
 
--- verbosity preset: cycle (normal mode); speak selection (visual/select)
-vim.keymap.set("n", "<leader>v", smn.cycle_verbosity, { desc = "Cycle verbosity preset" })
--- <Cmd> so it runs without leaving visual (selection stays valid)
+-- verbosity preset: cycle with <leader><leader>
+vim.keymap.set("n", "<leader><leader>", smn.cycle_verbosity, { desc = "Cycle verbosity preset" })
+-- speak selection (visual/select); <Cmd> so it runs without leaving visual
 vim.keymap.set({ "x", "s" }, "<leader>v", "<Cmd>lua require('say-my-name').selection()<CR>", { desc = "Speak selection" })
 
 -- per-feature auto toggles (<leader>t<feature>)
@@ -65,3 +65,4 @@ vim.keymap.set("n", "<leader>ti", function() smn.toggle("indent") end, { desc = 
 vim.keymap.set("n", "<leader>tw", function() smn.toggle("word") end, { desc = "Toggle auto word" })
 vim.keymap.set("n", "<leader>tm", function() smn.toggle("mode") end, { desc = "Toggle auto mode" })
 vim.keymap.set("n", "<leader>ty", function() smn.toggle("yank") end, { desc = "Toggle auto yank" })
+vim.keymap.set("n", "<leader>.", smn.toggle_punctuation, { desc = "Toggle speaking punctuation" })

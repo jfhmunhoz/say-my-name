@@ -8,6 +8,11 @@ local M = {}
 -- from a previous call stops spawning (matters for fast cursor navigation).
 local gen = 0
 
+-- Speak punctuation (brackets, commas, ...). Off by default; spd-say -m all.
+local punctuation = false
+function M.set_punctuation(on) punctuation = on and true or false end
+function M.get_punctuation() return punctuation end
+
 -- Build a spd-say argv for one utterance.
 --   opts.voice  spd-say voice type (e.g. "female1") — carries meaning via timbre
 --   opts.pitch  -100..100
@@ -17,6 +22,7 @@ local function build_cmd(text, opts, wait)
   opts = opts or {}
   local cmd = { "spd-say" }
   if wait then cmd[#cmd + 1] = "-w" end
+  if punctuation then vim.list_extend(cmd, { "-m", "all" }) end
   if opts.voice then vim.list_extend(cmd, { "-t", opts.voice }) end
   if opts.pitch then vim.list_extend(cmd, { "-p", tostring(opts.pitch) }) end
   if opts.rate then vim.list_extend(cmd, { "-r", tostring(opts.rate) }) end

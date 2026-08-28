@@ -86,8 +86,8 @@ keymaps on you. Leader is space in the harness.
 (`tl` line, `tn` number, `td` diagnostics, `ti` indent, `tw` word, `tm` mode,
 `ty` yank), each spoken back as "… on/off".
 
-**Verbosity presets** — `<leader>v` (normal mode) cycles them; then tweak with
-the toggles above.
+**Verbosity presets** — `<leader><leader>` cycles them; then tweak with the
+toggles above.
 
 | Preset | Auto-announces on a new line / event |
 |--------|--------------------------------------|

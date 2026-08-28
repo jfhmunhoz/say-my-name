@@ -6,14 +6,15 @@
 --   <leader>w  speak word under cursor
 --   <leader>n  speak line number
 --   <leader>m  speak current mode      (also in visual/select)
---   <leader>v  speak selection         (VISUAL mode; normal-mode <leader>v = verbosity)
+--   <leader>v  speak selection         (VISUAL mode)
 --   <leader>y  speak last yank
 --   <leader>i  beep indentation depth    (one beep per leading space)
 --   <leader>d  speak diagnostics on line (lua_ls; graver pitch = worse)
+--   <leader>.  toggle speaking punctuation (brackets, commas, ...)
 --   <leader>s  stop / panic-silence
 --
 -- Auto-announce (speaks as you move to a new line):
---   <leader>v  cycle verbosity preset  (minimal -> normal -> verbose)
+--   <leader><leader> cycle verbosity preset  (minimal -> normal -> verbose)
 --   <leader>tn toggle auto line number
 --   <leader>tl toggle auto line
 --   <leader>td toggle auto diagnostics

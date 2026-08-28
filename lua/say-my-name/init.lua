@@ -140,6 +140,13 @@ function M.last_yank()
   speech.say((vim.fn.getreg("0"):gsub("%s+", " ")))
 end
 
+-- Toggle whether punctuation (brackets, commas, ...) is spoken.
+function M.toggle_punctuation()
+  local on = not speech.get_punctuation()
+  speech.set_punctuation(on)
+  speech.say("punctuation " .. (on and "on" or "off"))
+end
+
 -- ===========================================================================
 -- Verbosity + per-feature auto toggles
 -- ===========================================================================
