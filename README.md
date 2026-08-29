@@ -81,7 +81,22 @@ keymaps on you. Leader is space in the harness.
 | `<leader>v` | the selection (visual mode) |
 | `<leader>y` | last yank |
 | `<leader>h` | opens a navigable buffer of all key mappings (read it with the commands above) |
+| `<leader>o` | toggles **tree navigation mode** (see below) |
 | `<leader>s` | stop / panic-silence |
+
+**Tree navigation mode** — instead of moving line by line, walk the file's
+structure as a tree (roadmap #4). `<leader>o` enters; then `h`/`j`/`k`/`l` move
+by *block*, not line: `j`/`k` = next/previous sibling, `l` = descend into a
+block, `h` = ascend to the enclosing block. Descending an `if` exposes its
+`then`/`elseif`/`else` branches as siblings, so you can walk each arm. The cursor
+follows each hop and the plugin speaks the block's kind and depth, kept terse
+("func", "loop", "if", "then", "else", "var", "depth 2"); a descending "beh"
+buzzer means there's no block that way. Plain motions still work inside the
+mode — `gg`, `G`, `/search`, `{`/`}` — and the tree re-attaches to the nearest
+block where you land (so `gg` jumps you to the first node). `<Esc>` (or
+`<leader>o` again) exits, leaving
+the cursor where you navigated — so `<leader>l` then reads that line. Built on
+treesitter, so it needs no LSP and works in any buffer with a parser.
 
 **Auto-announce** — fires as you move/act. Toggle one with `<leader>t<key>`
 (`tl` line, `tn` number, `td` diagnostics, `ti` indent, `tw` word, `tm` mode,
@@ -121,7 +136,7 @@ per-utterance queueing beyond cancel, Orca coexistence tuning.
 | 1 | ◐ | **Mode / action feedback** — "insert", "normal", "saved", "N lines yanked" | no non-visual cue for mode/action (cheapest win) | `ModeChanged`, `BufWritePost`, `TextYankPost` |
 | 2 | ✓ | **Cursor context on demand** — current line + line number + indent level | linear reading; lost position | keymap → `getline`/`line('.')`; debounced opt-in `CursorMoved` |
 | 3 | ✓ | **Indent / scope depth** — "level 3", or pitch earcon by depth | indentation read as "space space space"; scope invisible | indent calc + treesitter node depth; pitch via espeak/piper |
-| 4 | ○ | **Structural navigation** — jump next/prev function/class, speak the symbol path | linear navigation, no overview (the big one) | LSP `textDocument/documentSymbol` + treesitter |
+| 4 | ◐ | **Structural navigation** — walk the file as a tree, speak each block | linear navigation, no overview (the big one) | treesitter node tree (LSP symbols later) |
 | 5 | ✓ | **Diagnostics by voice** — "line N, error, <message>" | errors announced without location or type | `vim.diagnostic.get()` + `DiagnosticChanged` / `CursorHold` |
 | 6 | ○ | **Statement marks** — bookmarks that track the statement, not the line number | lose your place when consulting other code | **extmarks** (`nvim_buf_set_extmark`) — shift with edits, unlike `:mark` |
 
@@ -151,9 +166,10 @@ require("say-my-name").setup({
 
 ## Status
 
-Early development. Core on-demand commands and the auto-announce/verbosity layer
-work (see [Implemented](#implemented)); structural navigation and statement
-marks are next. API and keymaps still subject to change.
+Early development. Core on-demand commands, the auto-announce/verbosity layer,
+and a first cut of tree navigation work (see [Implemented](#implemented));
+richer structural navigation and statement marks are next. API and keymaps
+still subject to change.
 
 ## Reference environment
 

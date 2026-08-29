@@ -103,4 +103,23 @@ function M.tone(freq, ms)
   if cmd then vim.system(cmd) end
 end
 
+-- Play a sequence of { freq, ms } tones back to back (async, chained).
+function M.sequence(steps)
+  local i = 0
+  local function go()
+    i = i + 1
+    local s = steps[i]
+    if not s then return end
+    local cmd = player_cmd(ensure(s.freq, s.ms or 100, 0))
+    if not cmd then return end
+    vim.system(cmd, {}, function() vim.schedule(go) end)
+  end
+  go()
+end
+
+-- A two-tone descending buzzer: "can't do that" / a blocked move.
+function M.nope()
+  M.sequence({ { freq = 196, ms = 90 }, { freq = 147, ms = 120 } })
+end
+
 return M

@@ -6,8 +6,13 @@
 
 local speech = require("say-my-name.speech")
 local earcon = require("say-my-name.earcon")
+local tree = require("say-my-name.tree")
 
 local M = {}
+
+-- Tree navigation mode (see tree.lua). Toggle walks the file's structure with
+-- h/j/k/l instead of moving line by line.
+M.tree_toggle = tree.toggle
 
 -- ===========================================================================
 -- Providers (pure: return a segment list, possibly empty)
@@ -276,6 +281,7 @@ end
 -- word change. On a line change, word-mode defers to line-mode if it spoke.
 local last_line, last_word
 local function on_cursor()
+  if tree.active then return end -- tree mode drives the cursor and speaks itself
   local l = vim.fn.line(".")
   local w = word_at_cursor()
   if l ~= last_line then

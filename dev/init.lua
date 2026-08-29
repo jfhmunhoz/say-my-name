@@ -51,6 +51,7 @@ vim.keymap.set("n", "<leader>d", smn.diagnostics, { desc = "Speak line diagnosti
 vim.keymap.set({ "n", "x", "s" }, "<leader>m", "<Cmd>lua require('say-my-name').mode()<CR>", { desc = "Speak current mode" })
 vim.keymap.set("n", "<leader>y", smn.last_yank, { desc = "Speak last yank" })
 vim.keymap.set("n", "<leader>h", smn.help, { desc = "Open key mappings help" })
+vim.keymap.set("n", "<leader>o", smn.tree_toggle, { desc = "Toggle tree navigation mode" })
 vim.keymap.set("n", "<leader>s", smn.stop, { desc = "Stop speech (panic-silence)" })
 
 -- verbosity preset: cycle with <leader><leader>
