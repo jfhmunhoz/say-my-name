@@ -83,6 +83,10 @@ keymaps on you. Leader is space in the harness.
 | `<leader>h` | opens a navigable buffer of all key mappings (read it with the commands above) |
 | `<leader>o` | toggles **tree navigation mode** (see below) |
 | `<leader>b` | toggles **blindfold** — blanks the screen to test by ear |
+| `m{letter}` | sets a **statement mark** at the cursor (see below) |
+| `` `{letter} `` | jumps to a statement mark, speaking the line it now points at |
+| `<leader>k` | opens a navigable list of the buffer's statement marks |
+| `<leader>K` | clears the buffer's statement marks |
 | `<leader>s` | stop / panic-silence |
 
 **Tree navigation mode** — instead of moving line by line, walk the file's
@@ -98,6 +102,18 @@ block where you land (so `gg` jumps you to the first node). `<Esc>` (or
 `<leader>o` again) exits, leaving
 the cursor where you navigated — so `<leader>l` then reads that line. Built on
 treesitter, so it needs no LSP and works in any buffer with a parser.
+
+**Statement marks** (roadmap #6) — bookmarks that track the *statement*, not the
+line number. `m{letter}` drops a mark and speaks what it points at ("mark a,
+function greet"); `` `{letter} `` jumps back and speaks the line it now points at.
+Because marks are **extmarks**, they shift with edits — insert lines above a
+mark and it follows the code down, so a jump always lands on the right
+statement, not a stale line number. `<leader>k` opens a navigable, spoken list
+(letter — line — statement); `<leader>K` clears them. The keys are vim's own:
+letters the plugin didn't set fall through to native marks, so `` `` `` (last
+position), `` `. `` (last edit), and A-Z globals keep working. This is the flow
+for consulting other code without losing your place. In-session for now;
+persistence across sessions is deferred.
 
 **Auto-announce** — fires as you move/act. Toggle one with `<leader>t<key>`
 (`tl` line, `tn` number, `td` diagnostics, `ti` indent, `tw` word, `tm` mode,
@@ -139,7 +155,7 @@ per-utterance queueing beyond cancel, Orca coexistence tuning.
 | 3 | ✓ | **Indent / scope depth** — "level 3", or pitch earcon by depth | indentation read as "space space space"; scope invisible | indent calc + treesitter node depth; pitch via espeak/piper |
 | 4 | ◐ | **Structural navigation** — walk the file as a tree, speak each block | linear navigation, no overview (the big one) | treesitter node tree (LSP symbols later) |
 | 5 | ✓ | **Diagnostics by voice** — "line N, error, <message>" | errors announced without location or type | `vim.diagnostic.get()` + `DiagnosticChanged` / `CursorHold` |
-| 6 | ○ | **Statement marks** — bookmarks that track the statement, not the line number | lose your place when consulting other code | **extmarks** (`nvim_buf_set_extmark`) — shift with edits, unlike `:mark` |
+| 6 | ◐ | **Statement marks** — bookmarks that track the statement, not the line number | lose your place when consulting other code | **extmarks** (`nvim_buf_set_extmark`) — shift with edits, unlike `:mark` |
 
 Mode/action feedback (#1) is partial: mode and yank announce; **save**
 (`BufWritePost`) is not wired yet.
@@ -168,9 +184,9 @@ require("say-my-name").setup({
 ## Status
 
 Early development. Core on-demand commands, the auto-announce/verbosity layer,
-and a first cut of tree navigation work (see [Implemented](#implemented));
-richer structural navigation and statement marks are next. API and keymaps
-still subject to change.
+tree navigation, and statement marks work (see [Implemented](#implemented));
+richer structural navigation and cross-session mark persistence are next. API
+and keymaps still subject to change.
 
 ## Reference environment
 

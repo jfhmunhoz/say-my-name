@@ -55,6 +55,14 @@ vim.keymap.set("n", "<leader>o", smn.tree_toggle, { desc = "Toggle tree navigati
 vim.keymap.set("n", "<leader>b", smn.blindfold, { desc = "Toggle blindfold (blank screen)" })
 vim.keymap.set("n", "<leader>s", smn.stop, { desc = "Stop speech (panic-silence)" })
 
+-- statement marks: reuse vim's native mark keys. m{letter} sets a speaking,
+-- edit-tracking mark; `{letter} jumps to it (both fall through to vim's real
+-- marks for letters we don't own). <leader>k lists, <leader>K clears.
+vim.keymap.set("n", "m", smn.mark_set, { desc = "Set statement mark (m{letter})" })
+vim.keymap.set("n", "`", smn.mark_jump, { desc = "Jump to statement mark (`{letter})" })
+vim.keymap.set("n", "<leader>k", smn.mark_list, { desc = "List statement marks" })
+vim.keymap.set("n", "<leader>K", smn.mark_clear, { desc = "Clear statement marks" })
+
 -- verbosity preset: cycle with <leader><leader>
 vim.keymap.set("n", "<leader><leader>", smn.cycle_verbosity, { desc = "Cycle verbosity preset" })
 -- speak selection (visual/select); <Cmd> so it runs without leaving visual

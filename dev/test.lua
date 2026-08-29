@@ -16,6 +16,12 @@
 --                h/j/k/l = parent / next / prev / child block; <Esc> exits
 --                a blocked move plays the "beh" buzzer
 --   <leader>b  toggle BLINDFOLD: blank the screen, test by ear like a blind user
+--   m{letter}  set a STATEMENT MARK here (speaks what it points at)
+--   `{letter}  jump to a statement mark (speaks the line it now points at)
+--                marks track edits: insert lines above one and it follows the
+--                code down. letters you didn't set fall through to vim's marks.
+--   <leader>k  open a navigable list of this buffer's statement marks
+--   <leader>K  clear this buffer's statement marks
 --   <leader>s  stop / panic-silence
 --
 -- Auto-announce (speaks as you move to a new line):
