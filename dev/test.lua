@@ -17,7 +17,8 @@
 --                a blocked move plays the "beh" buzzer
 --   <leader>b  toggle BLINDFOLD: blank the screen, test by ear like a blind user
 --   m{letter}  set a STATEMENT MARK here (speaks what it points at)
---   `{letter}  jump to a statement mark (speaks the line it now points at)
+--   `{letter}  jump to a statement mark (exact pos; speaks the line there)
+--   '{letter}  jump to a statement mark (line; speaks the line there)
 --                marks track edits: insert lines above one and it follows the
 --                code down. letters you didn't set fall through to vim's marks.
 --   <leader>k  open a navigable list of this buffer's statement marks

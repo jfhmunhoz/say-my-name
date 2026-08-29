@@ -84,7 +84,7 @@ keymaps on you. Leader is space in the harness.
 | `<leader>o` | toggles **tree navigation mode** (see below) |
 | `<leader>b` | toggles **blindfold** — blanks the screen to test by ear |
 | `m{letter}` | sets a **statement mark** at the cursor (see below) |
-| `` `{letter} `` | jumps to a statement mark, speaking the line it now points at |
+| `` `{letter} `` / `'{letter}` | jumps to a statement mark, speaking the line it now points at |
 | `<leader>k` | opens a navigable list of the buffer's statement marks |
 | `<leader>K` | clears the buffer's statement marks |
 | `<leader>s` | stop / panic-silence |
@@ -105,7 +105,8 @@ treesitter, so it needs no LSP and works in any buffer with a parser.
 
 **Statement marks** (roadmap #6) — bookmarks that track the *statement*, not the
 line number. `m{letter}` drops a mark and speaks what it points at ("mark a,
-function greet"); `` `{letter} `` jumps back and speaks the line it now points at.
+function greet"); `` `{letter} `` (or `'{letter}`) jumps back and speaks the line
+it now points at.
 Because marks are **extmarks**, they shift with edits — insert lines above a
 mark and it follows the code down, so a jump always lands on the right
 statement, not a stale line number. `<leader>k` opens a navigable, spoken list

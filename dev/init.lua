@@ -60,6 +60,7 @@ vim.keymap.set("n", "<leader>s", smn.stop, { desc = "Stop speech (panic-silence)
 -- marks for letters we don't own). <leader>k lists, <leader>K clears.
 vim.keymap.set("n", "m", smn.mark_set, { desc = "Set statement mark (m{letter})" })
 vim.keymap.set("n", "`", smn.mark_jump, { desc = "Jump to statement mark (`{letter})" })
+vim.keymap.set("n", "'", smn.mark_jump_line, { desc = "Jump to statement mark line ('{letter})" })
 vim.keymap.set("n", "<leader>k", smn.mark_list, { desc = "List statement marks" })
 vim.keymap.set("n", "<leader>K", smn.mark_clear, { desc = "Clear statement marks" })
 

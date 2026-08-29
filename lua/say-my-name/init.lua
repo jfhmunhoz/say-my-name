@@ -18,7 +18,8 @@ M.tree_toggle = tree.toggle
 -- Statement marks (see marks.lua). Extmark bookmarks that track the statement
 -- across edits and speak on set/jump. mark_set/mark_jump wrap vim's m / ` keys.
 M.mark_set = marks.set_prompt
-M.mark_jump = marks.jump_prompt
+M.mark_jump = marks.jump_prompt        -- `{letter}  (exact position)
+M.mark_jump_line = marks.jump_line_prompt -- '{letter}  (line, first non-blank)
 M.mark_list = marks.list
 M.mark_clear = marks.clear
 

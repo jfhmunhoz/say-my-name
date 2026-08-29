@@ -98,18 +98,23 @@ function M.set_prompt()
   end
 end
 
--- `` ` `` pressed: jump our mark if we own that letter, else fall through to the
--- native jump (`` `` `` last position, `` `. `` last edit, A-Z globals, ...).
-function M.jump_prompt()
+-- `` ` `` or `'` pressed: jump our mark if we own that letter, else fall through
+-- to the native jump (`` `` ``/`''` last position, `` `. ``/`'.` last edit, A-Z
+-- globals, ...). `prefix` is the key that triggered us, replayed on fall-through
+-- ( `` ` `` = exact position, `'` = first non-blank of the line, vim's own split).
+local function jump_with(prefix)
   local ch = read_char()
   if not ch then return end
   local buf = vim.api.nvim_get_current_buf()
   if ch:match("^%l$") and have(buf, ch) then
     M.jump(ch)
   else
-    vim.api.nvim_feedkeys("`" .. ch, "n", false)
+    vim.api.nvim_feedkeys(prefix .. ch, "n", false)
   end
 end
+
+function M.jump_prompt() jump_with("`") end
+function M.jump_line_prompt() jump_with("'") end
 
 -- ---------------------------------------------------------------------------
 
