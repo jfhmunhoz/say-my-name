@@ -1,17 +1,20 @@
--- Earcons: short non-speech tones. Cheaper than words for quantities like
--- indentation depth (roadmap #3). A tone is synthesized once to a cached WAV,
--- then played N times, chained async so nvim never blocks.
+-- Earcons: short non-speech tones. Cheaper than words for prosodic cues like
+-- indentation change (roadmap #3): a rising ping means "deeper", a falling ping
+-- "shallower". Each distinct tone is synthesized once to a cached WAV keyed by
+-- its params, then played async so nvim never blocks.
 
 local M = {}
 
--- Tone: low and soft, easier on the ears than a high beep. Params are baked
--- into the cache filename, so changing them regenerates the WAV automatically.
+-- Default beep: low and soft, easier on the ears than a high beep.
 local FREQ = 180  -- Hz (deep)
 local MS = 90     -- tone length
 local GAP = 70    -- trailing silence, keeps chained beeps distinct
 
-local path = string.format("%s/say-my-name/beep-%d-%d-%d.wav",
-  vim.fn.stdpath("cache"), FREQ, MS, GAP)
+-- Params are baked into the filename, so changing a tone regenerates its WAV.
+local function wav_path(freq, ms, gap)
+  return string.format("%s/say-my-name/beep-%d-%d-%d.wav",
+    vim.fn.stdpath("cache"), freq, ms, gap)
+end
 
 -- little-endian byte encoders (LuaJIT has no string.pack)
 local function le16(v) return string.char(v % 256, math.floor(v / 256) % 256) end
@@ -22,7 +25,7 @@ end
 
 -- Write a mono 16-bit PCM WAV: `ms` of sine at `freq`, then `gap_ms` silence
 -- (the trailing silence keeps chained beeps audibly distinct).
-local function write_wav(freq, ms, gap_ms)
+local function write_wav(path, freq, ms, gap_ms)
   local sr = 44100
   local n = math.floor(sr * ms / 1000)
   local ng = math.floor(sr * gap_ms / 1000)
@@ -52,15 +55,18 @@ local function write_wav(freq, ms, gap_ms)
   fd:close()
 end
 
-local function ensure()
+-- Return a cached WAV path for these params, synthesizing it if missing.
+local function ensure(freq, ms, gap)
+  local path = wav_path(freq, ms, gap)
   if vim.fn.filereadable(path) == 0 then
-    write_wav(FREQ, MS, GAP)
+    write_wav(path, freq, ms, gap)
   end
+  return path
 end
 
 -- pick a file player once
 local player
-local function player_cmd()
+local function player_cmd(path)
   if player == nil then
     if vim.fn.executable("pw-play") == 1 then
       player = { "pw-play" }
@@ -76,12 +82,11 @@ local function player_cmd()
   return cmd
 end
 
--- Play the beep `n` times, one after another (async).
+-- Play the default beep `n` times, one after another (async).
 function M.beep(n)
   n = math.max(0, math.floor(n or 0))
   if n == 0 then return end
-  ensure()
-  local cmd = player_cmd()
+  local cmd = player_cmd(ensure(FREQ, MS, GAP))
   if not cmd then return end
   local i = 0
   local function go()
@@ -90,6 +95,12 @@ function M.beep(n)
     vim.system(cmd, {}, function() vim.schedule(go) end)
   end
   go()
+end
+
+-- Play one short pitched ping (async). Used as a prosodic direction cue.
+function M.tone(freq, ms)
+  local cmd = player_cmd(ensure(freq, ms or 120, 0))
+  if cmd then vim.system(cmd) end
 end
 
 return M

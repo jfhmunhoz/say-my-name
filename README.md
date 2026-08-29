@@ -75,16 +75,20 @@ keymaps on you. Leader is space in the harness.
 | `<leader>$` | cursor → end of line |
 | `<leader>w` | word under the cursor |
 | `<leader>n` | line number |
-| `<leader>i` | indentation depth — one low beep per leading space (earcon) |
+| `<leader>i` | indentation depth as a number ("four" for four leading spaces) |
 | `<leader>d` | line diagnostics, worst first, severity graded by pitch |
 | `<leader>m` | current mode (also in visual/select) |
 | `<leader>v` | the selection (visual mode) |
 | `<leader>y` | last yank |
+| `<leader>h` | opens a navigable buffer of all key mappings (read it with the commands above) |
 | `<leader>s` | stop / panic-silence |
 
 **Auto-announce** — fires as you move/act. Toggle one with `<leader>t<key>`
 (`tl` line, `tn` number, `td` diagnostics, `ti` indent, `tw` word, `tm` mode,
-`ty` yank), each spoken back as "… on/off".
+`ty` yank), each spoken back as "… on/off". Auto `ti` is a direction ping: a
+rising tone when the new line is deeper, a falling tone when shallower — no
+beep counting, just pitch. `<leader>t.` (or `<leader>.`)
+toggles speaking punctuation — a global speech setting, not an auto-announce.
 
 **Verbosity presets** — `<leader><leader>` cycles them; then tweak with the
 toggles above.

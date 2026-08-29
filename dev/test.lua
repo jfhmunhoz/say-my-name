@@ -8,9 +8,10 @@
 --   <leader>m  speak current mode      (also in visual/select)
 --   <leader>v  speak selection         (VISUAL mode)
 --   <leader>y  speak last yank
---   <leader>i  beep indentation depth    (one beep per leading space)
+--   <leader>i  speak indentation depth   (as a number, e.g. "four")
 --   <leader>d  speak diagnostics on line (lua_ls; graver pitch = worse)
 --   <leader>.  toggle speaking punctuation (brackets, commas, ...)
+--   <leader>h  open navigable list of all mappings (read it with the commands above)
 --   <leader>s  stop / panic-silence
 --
 -- Auto-announce (speaks as you move to a new line):
@@ -18,12 +19,13 @@
 --   <leader>tn toggle auto line number
 --   <leader>tl toggle auto line
 --   <leader>td toggle auto diagnostics
---   <leader>ti toggle auto indent
+--   <leader>ti toggle auto indent (deeper line -> rising ping, shallower -> falling)
 --   <leader>tw toggle auto word   (speaks each word as you jump w/b/e)
 --   <leader>tm toggle auto mode   (speaks the mode whenever you switch)
 --   <leader>ty toggle auto yank   (speaks yanked text after each yank)
+--   <leader>t. toggle punctuation (also <leader>.)
 -- Pick a preset with <leader>v, then tweak with <leader>t*. minimal = commands
--- only; verbose = number + line + diagnostics + indent beep on every new line.
+-- only; verbose = number + line + diagnostics + indent ping on every new line.
 --
 -- What to try, and what you should hear:
 
@@ -37,7 +39,7 @@ end
 
 function M.indentation_demo()
   if true then
-    while true do -- <leader>i on the lines below: 4, 6, 8 spaces -> more beeps
+    while true do -- <leader>i on the lines below says 4, 6, 8; auto ti pings up/down
       for _ = 1, 3 do
         local antidisestablishmentarianism = 1 -- <leader>w on this long word
         return antidisestablishmentarianism

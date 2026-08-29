@@ -92,6 +92,11 @@ local function indent_count()
   return vim.fn.indent(vim.fn.line("."))
 end
 
+-- Indent-change ping: an octave pair, easy on the ears (a table-tennis "pock").
+-- Auto-indent plays the rising tone when you move to a deeper line, the falling
+-- tone when shallower — direction by pitch, no words.
+local INDENT_TONE = { up = 659, down = 330 } -- E5 rising / E4 falling
+
 -- Spoken name for the current vim mode.
 local MODE_NAMES = {
   n = "normal", i = "insert", v = "visual", V = "visual line",
@@ -123,7 +128,8 @@ function M.diagnostics()
   if #segs == 0 then speech.say("no diagnostics") else speech.say_segments(segs) end
 end
 
-function M.indent() earcon.beep(indent_count()) end
+-- Speak the indentation depth as a number ("four" for four leading spaces).
+function M.indent() speech.say(tostring(indent_count())) end
 function M.mode() speech.say(mode_name()) end
 function M.stop() speech.stop() end
 
@@ -145,6 +151,45 @@ function M.toggle_punctuation()
   local on = not speech.get_punctuation()
   speech.set_punctuation(on)
   speech.say("punctuation " .. (on and "on" or "off"))
+end
+
+-- Open a navigable buffer listing the leader key mappings (key — description).
+-- Blind-accessible by construction: it's plain text, so this plugin's own line
+-- reading (or a screen reader) consults it. Built from live keymaps' desc, so
+-- it always matches whatever is bound. `q` closes it.
+function M.help()
+  -- collapse the same key across modes into one row, tagging visual bindings
+  local by_key, keys = {}, {}
+  for _, mode in ipairs({ "n", "x", "s" }) do
+    for _, m in ipairs(vim.api.nvim_get_keymap(mode)) do
+      if m.desc and m.lhs:sub(1, 1) == " " then -- leader (space) mappings
+        local key = vim.fn.keytrans(m.lhs)
+        local e = by_key[key]
+        if not e then e = { desc = m.desc, visual = false }; by_key[key] = e; keys[#keys + 1] = key end
+        if mode == "x" or mode == "s" then e.visual = true end
+      end
+    end
+  end
+  table.sort(keys)
+  local rows = {}
+  for _, key in ipairs(keys) do
+    local e = by_key[key]
+    rows[#rows + 1] = string.format("%-18s %s%s", key, e.desc, e.visual and "  (visual)" or "")
+  end
+  local count = #rows
+  table.insert(rows, 1, ("say-my-name — %d key mappings.  q to close."):format(count))
+  table.insert(rows, 2, "")
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, rows)
+  vim.bo[buf].modifiable = false
+  vim.bo[buf].bufhidden = "wipe"
+  vim.keymap.set("n", "q", "<Cmd>close<CR>", { buffer = buf, desc = "Close help" })
+
+  vim.cmd("botright split")
+  vim.api.nvim_set_current_buf(buf)
+  vim.api.nvim_win_set_cursor(0, { 1, 0 })
+  speech.say(("help, %d mappings"):format(count))
 end
 
 -- ===========================================================================
@@ -204,6 +249,9 @@ function M.toggle(feature)
   speech.say((labels[feature] or feature) .. " " .. (auto[feature] and "on" or "off"))
 end
 
+-- Indent depth of the previous line visited, for the auto-indent direction ping.
+local last_indent
+
 -- Speak the enabled line-based announcements as one phrase, in a fixed order
 -- (number, line, diagnostic). Returns true if anything was spoken.
 local function line_announce()
@@ -213,7 +261,14 @@ local function line_announce()
   if auto.diagnostics then vim.list_extend(segs, seg_diagnostics()) end
   local spoke = #segs > 0
   if spoke then speech.say_segments(segs) end
-  if auto.indent then earcon.beep(indent_count()) end
+  if auto.indent then
+    local cur = indent_count()
+    if last_indent ~= nil then
+      if cur > last_indent then earcon.tone(INDENT_TONE.up)
+      elseif cur < last_indent then earcon.tone(INDENT_TONE.down) end
+    end
+    last_indent = cur
+  end
   return spoke
 end
 
@@ -249,7 +304,7 @@ function M.setup(opts)
   vim.api.nvim_create_autocmd("CursorMoved", { group = grp, callback = on_cursor })
   -- forget position on buffer switch so the first move there announces
   vim.api.nvim_create_autocmd("BufEnter", { group = grp, callback = function()
-    last_line, last_word = nil, nil
+    last_line, last_word, last_indent = nil, nil, nil
   end })
   -- mode announce on switch, deduped (skips transient same-name transitions)
   local last_mode

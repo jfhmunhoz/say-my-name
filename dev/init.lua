@@ -50,6 +50,7 @@ vim.keymap.set("n", "<leader>d", smn.diagnostics, { desc = "Speak line diagnosti
 -- <Cmd> so it runs without leaving visual/select (mode() stays correct)
 vim.keymap.set({ "n", "x", "s" }, "<leader>m", "<Cmd>lua require('say-my-name').mode()<CR>", { desc = "Speak current mode" })
 vim.keymap.set("n", "<leader>y", smn.last_yank, { desc = "Speak last yank" })
+vim.keymap.set("n", "<leader>h", smn.help, { desc = "Open key mappings help" })
 vim.keymap.set("n", "<leader>s", smn.stop, { desc = "Stop speech (panic-silence)" })
 
 -- verbosity preset: cycle with <leader><leader>
@@ -65,4 +66,5 @@ vim.keymap.set("n", "<leader>ti", function() smn.toggle("indent") end, { desc = 
 vim.keymap.set("n", "<leader>tw", function() smn.toggle("word") end, { desc = "Toggle auto word" })
 vim.keymap.set("n", "<leader>tm", function() smn.toggle("mode") end, { desc = "Toggle auto mode" })
 vim.keymap.set("n", "<leader>ty", function() smn.toggle("yank") end, { desc = "Toggle auto yank" })
+vim.keymap.set("n", "<leader>t.", smn.toggle_punctuation, { desc = "Toggle speaking punctuation" })
 vim.keymap.set("n", "<leader>.", smn.toggle_punctuation, { desc = "Toggle speaking punctuation" })
