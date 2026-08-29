@@ -197,6 +197,60 @@ function M.help()
   speech.say(("help, %d mappings"):format(count))
 end
 
+-- Blindfold: blank the screen (conceal every character, hide numbers/status/
+-- cursorline) so you can test the plugin by ear, like a blind user, while the
+-- buffer and all editing keep working. Reversible — toggles back to what it was.
+local blindfold = { on = false, match = nil, saved = {} }
+function M.blindfold()
+  if not blindfold.on then
+    blindfold.saved = {
+      conceallevel = vim.wo.conceallevel, concealcursor = vim.wo.concealcursor,
+      number = vim.wo.number, relativenumber = vim.wo.relativenumber,
+      cursorline = vim.wo.cursorline, signcolumn = vim.wo.signcolumn,
+      laststatus = vim.o.laststatus, guicursor = vim.o.guicursor,
+      termguicolors = vim.o.termguicolors,
+      hl_normal = vim.api.nvim_get_hl(0, { name = "Normal" }),
+      hl_cursor = vim.api.nvim_get_hl(0, { name = "Cursor" }),
+    }
+    vim.wo.conceallevel = 3
+    vim.wo.concealcursor = "nvic" -- conceal the cursor line too, in every mode
+    vim.wo.number = false
+    vim.wo.relativenumber = false
+    vim.wo.cursorline = false
+    vim.wo.signcolumn = "no"
+    vim.o.laststatus = 0
+    -- conceal every character in the window; at conceallevel 3 the replacement
+    -- char is hidden too, so the whole buffer renders blank
+    blindfold.match = vim.fn.matchadd("Conceal", ".", 10, -1, { conceal = " " })
+    -- hide the cursor too: paint a solid background and make the cursor block
+    -- the same color, so it vanishes. termguicolors so the terminal obeys.
+    local bg = blindfold.saved.hl_normal.bg
+    local color = bg and string.format("#%06x", bg) or "#000000"
+    vim.o.termguicolors = true
+    vim.api.nvim_set_hl(0, "Normal", { fg = color, bg = color })
+    vim.api.nvim_set_hl(0, "Cursor", { fg = color, bg = color, blend = 100 })
+    vim.o.guicursor = "a:Cursor/lCursor"
+    blindfold.on = true
+    speech.say("blindfold on")
+  else
+    if blindfold.match then pcall(vim.fn.matchdelete, blindfold.match); blindfold.match = nil end
+    local s = blindfold.saved
+    vim.wo.conceallevel = s.conceallevel
+    vim.wo.concealcursor = s.concealcursor
+    vim.wo.number = s.number
+    vim.wo.relativenumber = s.relativenumber
+    vim.wo.cursorline = s.cursorline
+    vim.wo.signcolumn = s.signcolumn
+    vim.o.laststatus = s.laststatus
+    vim.o.guicursor = s.guicursor
+    vim.api.nvim_set_hl(0, "Normal", s.hl_normal)
+    vim.api.nvim_set_hl(0, "Cursor", s.hl_cursor)
+    vim.o.termguicolors = s.termguicolors
+    blindfold.on = false
+    speech.say("blindfold off")
+  end
+end
+
 -- ===========================================================================
 -- Verbosity + per-feature auto toggles
 -- ===========================================================================

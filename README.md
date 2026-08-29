@@ -82,6 +82,7 @@ keymaps on you. Leader is space in the harness.
 | `<leader>y` | last yank |
 | `<leader>h` | opens a navigable buffer of all key mappings (read it with the commands above) |
 | `<leader>o` | toggles **tree navigation mode** (see below) |
+| `<leader>b` | toggles **blindfold** — blanks the screen to test by ear |
 | `<leader>s` | stop / panic-silence |
 
 **Tree navigation mode** — instead of moving line by line, walk the file's

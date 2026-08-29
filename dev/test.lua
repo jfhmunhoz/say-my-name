@@ -15,6 +15,7 @@
 --   <leader>o  toggle TREE MODE: walk file structure, not lines
 --                h/j/k/l = parent / next / prev / child block; <Esc> exits
 --                a blocked move plays the "beh" buzzer
+--   <leader>b  toggle BLINDFOLD: blank the screen, test by ear like a blind user
 --   <leader>s  stop / panic-silence
 --
 -- Auto-announce (speaks as you move to a new line):
