@@ -60,6 +60,44 @@ the backend. This keeps providers testable and the backend swappable.
 
 Spawned via `vim.system()` (Neovim ≥ 0.10), never blocking.
 
+## Try it
+
+One command clones the plugin into an **isolated** Neovim profile and opens it
+on the test file with every key mapping wired:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/jfhmunhoz/say-my-name/main/dev/demo.sh | sh
+```
+
+It uses `NVIM_APPNAME`, so config, data, state, and shada all live under a
+separate `say-my-name-demo` app name — **your own `~/.config/nvim` is never
+touched.** The script checks for its dependencies (Neovim ≥ 0.10 and `spd-say`
+from speech-dispatcher, plus a WAV player for the sound cues) and, if any are
+missing, prints the install command and asks before running it. Re-running
+updates the copy and relaunches. Leader is space; press `<Space>h` for the key
+list. To remove it, delete the `say-my-name-demo` directories the script prints.
+
+Prefer not to pipe curl into a shell? Clone and run it yourself:
+
+```sh
+git clone https://github.com/jfhmunhoz/say-my-name && sh say-my-name/dev/demo.sh
+```
+
+**Install it in your own config** instead — it's a normal plugin, installable
+from the git URL with any manager (no registration needed). With
+[lazy.nvim](https://github.com/folke/lazy.nvim):
+
+```lua
+{
+  "jfhmunhoz/say-my-name",
+  config = function()
+    require("say-my-name").setup({ verbosity = "minimal" })
+    -- the plugin sets no keys; bind the ones you want. See dev/init.lua for a
+    -- full example set (line, word, marks, tree mode, blindfold, panic, ...).
+  end,
+}
+```
+
 ## Implemented
 
 Working today (preview; the API is still moving). The plugin exposes functions
